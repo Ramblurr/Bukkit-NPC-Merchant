@@ -16,6 +16,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.Event.Priority;
 import org.bukkit.event.world.WorldListener;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -26,12 +27,16 @@ import redecouverte.npcspawner.BasicHumanNpc;
 import redecouverte.npcspawner.BasicHumanNpcList;
 import redecouverte.npcspawner.NpcSpawner;
 
+import com.nijiko.permissions.PermissionHandler;
+import com.nijikokun.bukkit.Permissions.Permissions;
+
 /**
  * NPCMerchant for Bukkit
  * 
  * @author CaseyLink
  */
 public class NPCMerchant extends JavaPlugin {
+    private static PermissionHandler        Permissions    = null;
     private final NPCMerchantPlayerListener playerListener = new NPCMerchantPlayerListener(
                                                                    this);
     private final NPCMerchantBlockListener  blockListener  = new NPCMerchantBlockListener(
@@ -66,6 +71,9 @@ public class NPCMerchant extends JavaPlugin {
         Configuration config = this.getConfiguration();
         String world_name = config.getString("worldname");
 
+        if ( !setupPermissions() )
+            return;
+
         // Register our events
         PluginManager pm = getServer().getPluginManager();
         pm.registerEvent(Event.Type.PLAYER_JOIN, playerListener, Priority.Normal, this);
@@ -86,6 +94,21 @@ public class NPCMerchant extends JavaPlugin {
 
         NPCMerchant.info("Disabling");
         saveNPCs();
+    }
+
+    public boolean setupPermissions() {
+        Plugin p = this.getServer().getPluginManager().getPlugin("Permissions");
+        if ( this.Permissions == null ) {
+            if ( p != null ) {
+                this.getServer().getPluginManager().enablePlugin(p);
+                this.Permissions = ( (Permissions) p).getHandler();
+                return true;
+            } else {
+                error("Permissions not detected. Plugin disabled.");
+                return false;
+            }
+        }
+        return true;
     }
 
     public void saveNPCs() {
@@ -242,6 +265,10 @@ public class NPCMerchant extends JavaPlugin {
             String subCommand = args[0].toLowerCase();
 
             Player player = (Player) sender;
+
+            if ( !NPCMerchant.Permissions.has(player, "npcmerchant.merchant") )
+                return true;
+
             Location l = player.getLocation();
 
             // create npc-id npc-name
@@ -292,5 +319,4 @@ public class NPCMerchant extends JavaPlugin {
 
         return true;
     }
-
 }
