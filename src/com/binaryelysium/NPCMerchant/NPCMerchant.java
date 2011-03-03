@@ -63,6 +63,9 @@ public class NPCMerchant extends JavaPlugin {
         this.TraderList = new HashMap<String, HumanTrader>();
         reloadMerchantConfig();
 
+        Configuration config = this.getConfiguration();
+        String world_name = config.getString("worldname");
+
         // Register our events
         PluginManager pm = getServer().getPluginManager();
         pm.registerEvent(Event.Type.PLAYER_JOIN, playerListener, Priority.Normal, this);
@@ -73,7 +76,7 @@ public class NPCMerchant extends JavaPlugin {
                 this);
         pm.registerEvent(Event.Type.WORLD_LOADED, mWorldListener, Priority.Normal, this);
 
-        spawnAllNPCs(this.getServer().getWorld("world"));
+        spawnAllNPCs(this.getServer().getWorld(world_name));
         PluginDescriptionFile pdfFile = this.getDescription();
         NPCMerchant.info(pdfFile.getName() + " version " + pdfFile.getVersion()
                 + ": loaded " + TraderList.size() + " npcs.");
