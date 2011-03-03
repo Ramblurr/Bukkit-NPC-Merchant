@@ -41,14 +41,7 @@ public class NPCMerchant extends JavaPlugin {
                                                                    this);
     private EEntityListener                 mEntityListener;
     public BasicHumanNpcList                HumanNPCList;
-    public HashMap<String, HumanTrader>     TraderList;                                     // map
-                                                                                             // of
-                                                                                             // NPC
-                                                                                             // unique
-                                                                                             // ids
-                                                                                             // and
-                                                                                             // the
-                                                                                             // traders
+    public HashMap<String, HumanTrader>     TraderList;
 
     private static Logger                   log            = Logger.getLogger("Minecraft");
 
