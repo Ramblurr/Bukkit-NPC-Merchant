@@ -66,10 +66,19 @@ public class NPCMerchant extends JavaPlugin {
     public void onEnable() {
         this.HumanNPCList = new BasicHumanNpcList();
         this.TraderList = new HashMap<String, HumanTrader>();
-        reloadMerchantConfig();
 
         Configuration config = this.getConfiguration();
         String world_name = config.getString("worldname");
+
+        if ( world_name == null || world_name.trim().length() == 0 ) {
+            error("Failed to load plugin. worldname config option not found.");
+        }
+
+        World world = this.getServer().getWorld(world_name);
+        if ( world == null ) {
+            error("Failed to load plugin. World '" + world_name + "' not found.");
+            return;
+        }
 
         if ( !setupPermissions() )
             return;
@@ -84,7 +93,9 @@ public class NPCMerchant extends JavaPlugin {
                 this);
         pm.registerEvent(Event.Type.WORLD_LOADED, mWorldListener, Priority.Normal, this);
 
-        spawnAllNPCs(this.getServer().getWorld(world_name));
+        reloadMerchantConfig();
+        spawnAllNPCs(world);
+
         PluginDescriptionFile pdfFile = this.getDescription();
         NPCMerchant.info(pdfFile.getName() + " version " + pdfFile.getVersion()
                 + ": loaded " + TraderList.size() + " npcs.");
