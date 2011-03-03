@@ -19,12 +19,9 @@ public class EEntityListener extends EntityListener {
 
     private static final Logger logger = Logger.getLogger("Minecraft");
     private final NPCTrader parent;
-    private HashMap<String, Integer> mPrices;
-    private HashMap<String, Transaction> mTransactions = new HashMap<String, Transaction>();
 
-    public EEntityListener(NPCTrader parent, HashMap<String, Integer> prices) {
+    public EEntityListener(NPCTrader parent) {
         this.parent = parent;
-        this.mPrices = prices;
     }
 
     public void onEntityDamage(EntityDamageEvent event) {
@@ -37,8 +34,10 @@ public class EEntityListener extends EntityListener {
 	            if (npc != null && sub.getDamager() instanceof Player) {
 	
 	                Player player = (Player) sub.getDamager();
-	                
-	                
+	                HumanTrader trader = parent.TraderList.get(npc.getUniqueId());
+                    if( trader != null ) {
+                    	trader.leftClicked(player);
+                    }
 	                event.setCancelled(true);
 	            }
 	        }
@@ -57,7 +56,10 @@ public class EEntityListener extends EntityListener {
                 if (nevent.getNpcReason() == NpcTargetReason.NPC_RIGHTCLICKED) {
                     Player p = (Player) event.getTarget();
                     
-                    
+                    HumanTrader trader = parent.TraderList.get(npc.getUniqueId());
+                    if( trader != null ) {
+                    	trader.rightClicked(p);
+                    }
                     
                 }
             }

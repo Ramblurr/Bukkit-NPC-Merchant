@@ -7,16 +7,13 @@ import java.util.Map;
 
 import org.bukkit.entity.Player;
 
-import redecouverte.npcspawner.BasicHumanNpc;
-
-public class HumanTrader extends BasicHumanNpc{
+public class HumanTrader {
 	// map of items for sale and what their value is
 	private HashMap<String, List<ItemValuePair> > mPrices;
 	// map of ongoing transactions
 	private HashMap<String, Transaction> mTransactions = new HashMap<String, Transaction>();
 
 	public HumanTrader(HashMap<String, List<ItemValuePair> > prices) {
-		super() // TODO
 		mPrices = prices;
 	}
 	

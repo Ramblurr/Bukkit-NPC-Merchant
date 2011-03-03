@@ -2,6 +2,6 @@ name: NPCTrader
 main: com.binaryelysium.NPCTrader.NPCTrader
 version: 0.1
 commands:
-  bnpc:
-    description: Main npc command
-    usage: /bnpc
+  merchant:
+    description: Control NPC Merchants
+    usage: /merchant create <npc name> OR /merchant move <npc name>

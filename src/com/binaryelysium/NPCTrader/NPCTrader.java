@@ -2,7 +2,9 @@ package com.binaryelysium.NPCTrader;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -14,7 +16,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Server;
+import org.bukkit.World;
 import org.bukkit.event.Event.Priority;
+import org.bukkit.event.world.WorldEvent;
+import org.bukkit.event.world.WorldListener;
 import org.bukkit.event.Event;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.PluginDescriptionFile;
@@ -38,73 +43,110 @@ public class NPCTrader extends JavaPlugin {
     private final NPCTraderPlayerListener playerListener = new NPCTraderPlayerListener(this);
     private final NPCTraderBlockListener blockListener = new NPCTraderBlockListener(this);
     private final HashMap<Player, Boolean> debugees = new HashMap<Player, Boolean>();
+    private WorldListener mWorldListener = new WorldListener() {
+    	public void onWorldLoaded(WorldEvent event) {
+    		spawnAllNPCs(event.getWorld());
+        }
+    };
     private EEntityListener mEntityListener;
     public BasicHumanNpcList HumanNPCList;
     public HashMap<String, HumanTrader> TraderList; // map of NPC unique ids and the traders
     
-    private Logger log;
+    private static Logger log = Logger.getLogger("Minecraft");
+    
+    private final static String logPrefix = "[NPC Merchant] ";
+    public static void info(String msg) {
+    	log.log(Level.INFO, logPrefix + msg);
+    }
+    
+    public static void error(String msg) {
+    	log.log(Level.SEVERE, logPrefix + msg);
+    }
     
     public NPCTrader() {
-    	log = Logger.getLogger("Minecraft");
     }
-    
-    private void firstRunSetup() {
-    	File dataFolder = getDataFolder();
-    	if( !dataFolder.mkdirs() ) {
-    		log.log(Level.SEVERE, "Failed to create data folder");
-    		
-    		File config = new File(dataFolder, "config.yml");
-    		try { 
-    			if(!config.createNewFile())
-    				throw new IOException("failed");
-    		} catch(IOException e) {
-    			log.log(Level.SEVERE, "Failed to create config file");
-    		}
-    			
-    	}
-    	
-    }
+
     public void onEnable() {
-    	
-    	HashMap<String, Integer> prices = new HashMap<String, Integer>();
-    	
+        this.HumanNPCList = new BasicHumanNpcList();  
+        this.TraderList = new HashMap<String, HumanTrader>();
     	Configuration config = this.getConfiguration();
     	
-    	// Ugly ugly hack to workaround broken getNodes() 
-    	Object o = config.getProperty("prices");
+    	List<String> npc_list = config.getStringList("npcs", null);
+    	
+    	for( String npc_name : npc_list ) {
+    		
+    		// load items
+    		Map<String, ConfigurationNode> items = config.getNodes(npc_name+".items_for_sale");
+    		HashMap<String, List<ItemValuePair> > items_map = new HashMap<String, List<ItemValuePair> >();
+    		for( Map.Entry<String, ConfigurationNode> entry : items.entrySet() ) {
+    			String item_for_sale = entry.getKey();
+    			List<ItemValuePair> subitems = this.parseItemValuePairs(config, npc_name+".items_for_sale."+item_for_sale);
+    			items_map.put(item_for_sale, subitems);
+    		}
+    		HumanTrader trader = new HumanTrader(items_map);
+    		this.TraderList.put(npc_name, trader);
+    		NPCTrader.info("Loaded " + npc_name + " with " + items_map + " items for sale.");
+    	}
+
+        // Register our events
+        PluginManager pm = getServer().getPluginManager();
+        pm.registerEvent(Event.Type.PLAYER_JOIN, playerListener, Priority.Normal, this);
+       
+        mEntityListener = new EEntityListener(this);
+        pm.registerEvent(Event.Type.ENTITY_TARGET, mEntityListener, Priority.Normal, this);
+        pm.registerEvent(Event.Type.ENTITY_DAMAGED, mEntityListener, Priority.Normal, this);
+        pm.registerEvent(Event.Type.WORLD_LOADED, mWorldListener, Priority.Normal, this);
+
+        PluginDescriptionFile pdfFile = this.getDescription();
+        NPCTrader.info(pdfFile.getName() + " version " + pdfFile.getVersion() + ": loaded "+ TraderList.size() + " npcs.");
+    }
+    
+    public void onDisable() {
+    	
+    	NPCTrader.info("Disabling");
+    	Configuration config = this.getConfiguration();
+    	for( BasicHumanNpc npc : HumanNPCList.values() ) {
+    		NPCTrader.info("Saving NPC " + npc.getName());
+    		Location loc = npc.getBukkitEntity().getLocation();
+    		
+    		String base_pos_path = npc.getUniqueId()+".position.";
+    		
+    		config.setProperty(base_pos_path+"x", loc.getX());
+    		config.setProperty(base_pos_path+"y", loc.getZ());
+    		config.setProperty(base_pos_path+"z", loc.getY());
+    		config.setProperty(base_pos_path+"yaw", loc.getYaw());
+    		config.setProperty(base_pos_path+"pitch", loc.getPitch());
+    	}
+    	if ( !config.save() ) {
+    		NPCTrader.error("Couldn't save config");
+    	}
+    }
+    
+    public List<ItemValuePair> parseItemValuePairs(Configuration config, String path) {
+		// Ugly ugly hack to workaround broken getNodes() 
+    	Object o = config.getProperty(path);
         if (o == null) {
-        	log.log(Level.SEVERE, "Could not find any items+prices");
+        	NPCTrader.error("Could not find items: " + path);
         } else if (o instanceof Map) {
             Map<String, ConfigurationNode> nodes =
                 new HashMap<String, ConfigurationNode>();
-
+            List<ItemValuePair> list = new ArrayList<ItemValuePair>();
             for (Map.Entry<String, Object> entry : ((Map<String, Object>)o).entrySet()) {
             	String item = entry.getKey();
             	int value = -1;
             	try { 
             		value = (Integer) entry.getValue();
             	} catch( ClassCastException e ) {
-            		log.log(Level.SEVERE, "Failed to parse config file. Error with key: " + entry.getKey());
+            		NPCTrader.error("Failed to parse config file. Error with key: " + entry.getKey() + " for " + path);
             	}
-            	prices.put(item, value);
+            	if( value != -1 ) {
+            		ItemValuePair pair = new ItemValuePair(item, value);
+            		list.add(pair);
+            	}
             }
+            return list;
         }
-
-        // Register our events
-        PluginManager pm = getServer().getPluginManager();
-        pm.registerEvent(Event.Type.PLAYER_JOIN, playerListener, Priority.Normal, this);
-       
-        mEntityListener = new EEntityListener(this, prices);
-        pm.registerEvent(Event.Type.ENTITY_TARGET, mEntityListener, Priority.Normal, this);
-        pm.registerEvent(Event.Type.ENTITY_DAMAGED, mEntityListener, Priority.Normal, this);
-
-        this.HumanNPCList = new BasicHumanNpcList();        
-
-        PluginDescriptionFile pdfFile = this.getDescription();
-        log.log(Level.INFO, pdfFile.getName() + " version " + pdfFile.getVersion() + ": loaded "+ prices.size() + " items.");
-    }
-    public void onDisable() {
-
+    	return null;
     }
 
     public boolean isDebugging(final Player player) {
@@ -119,6 +161,34 @@ public class NPCTrader extends JavaPlugin {
         debugees.put(player, value);
     }
     
+    private void spawnAllNPCs(World world) {
+    	NPCTrader.info("Spawning all NPCs");
+    	this.HumanNPCList.clear();
+    	Configuration config = this.getConfiguration();
+    	
+    	List<String> npc_list = config.getStringList("npcs", null);
+    	
+    	for( String npc_name : npc_list ) {
+    		// load position info
+    		float yaw, pitch;
+    		Double x,y,z;
+    		String base_pos_path = npc_name+".position.";
+    		
+    		x = (Double) config.getProperty(base_pos_path+"x");
+    		y = (Double) config.getProperty(base_pos_path+"y");
+    		z = (Double) config.getProperty(base_pos_path+"z");
+    		
+    		yaw = (float) config.getDouble(base_pos_path+"yaw", 0);
+    		pitch = (float) config.getDouble(base_pos_path+"pitch", 0);
+    		
+    		if( x != null && y != null &&z != null ) {
+    			NPCTrader.info("Spawning " + npc_name);
+    			BasicHumanNpc hnpc = NpcSpawner.SpawnBasicHumanNpc(npc_name, npc_name, world, x, y, z, yaw, pitch);
+                this.HumanNPCList.put(npc_name, hnpc);
+    		}
+    	}
+    }
+    
     static boolean spawnHuman = true;
 
     @Override
@@ -126,7 +196,7 @@ public class NPCTrader extends JavaPlugin {
 
         try {
 
-            if (!command.getName().toLowerCase().equals("bnpc")) {
+            if (!command.getName().toLowerCase().equals("merchant")) {
                 return false;
             }
             if (!(sender instanceof Player)) {
@@ -145,7 +215,7 @@ public class NPCTrader extends JavaPlugin {
 
             // create npc-id npc-name
             if (subCommand.equals("create")) {
-                if (args.length < 3) {
+                if (args.length < 2) {
                     return false;
                 }
 
@@ -154,26 +224,8 @@ public class NPCTrader extends JavaPlugin {
                     return true;
                 }
 
-                BasicHumanNpc hnpc = NpcSpawner.SpawnBasicHumanNpc(args[1], args[2], player.getWorld(), l.getX(), l.getY(), l.getZ(), l.getYaw(), l.getPitch());
+                BasicHumanNpc hnpc = NpcSpawner.SpawnBasicHumanNpc(args[1], args[1], player.getWorld(), l.getX(), l.getY(), l.getZ(), l.getYaw(), l.getPitch());
                 this.HumanNPCList.put(args[1], hnpc);
-                
-                ItemStack is = new ItemStack(Material.BOOKSHELF);
-                is.setAmount(1);
-                hnpc.getBukkitEntity().setItemInHand(is);
-
-
-            // attackme npc-id
-            } else if (subCommand.equals("attackme")) {
-
-                if (args.length < 2) {
-                    return false;
-                }
-
-                BasicHumanNpc npc = this.HumanNPCList.get(args[1]);
-                if (npc != null) {
-                    npc.attackLivingEntity(player);
-                    return true;
-                }
 
             // move npc-id
             } else if (subCommand.equals("move")) {
@@ -187,15 +239,12 @@ public class NPCTrader extends JavaPlugin {
                     return true;
                 }
 
-            // spawnpig
-            } else if (subCommand.equals("spawnpig")) {
-                NpcSpawner.SpawnMob(MobType.PIG, player.getWorld(), l.getX(), l.getY(), l.getZ());
             }
 
 
         } catch (Exception e) {
             sender.sendMessage("An error occured.");
-            System.out.println("BasicNPCs: error: " + e.getMessage() + e.getStackTrace().toString());
+            System.out.println("NPC Merchant: error: " + e.getMessage() + e.getStackTrace().toString());
             e.printStackTrace();
             return true;
         }
