@@ -4,4 +4,4 @@ version: 0.1
 commands:
   merchant:
     description: Control NPC Merchants
-    usage: /merchant create npc_name OR /merchant move npc_name OR /merchant remove npc_name  (npc_name is case sensitive)
+    usage: /merchant [create|move|remove] npc_name OR /merchant [yell|broadcast] npc_name message (npc_name is case sensitive)
