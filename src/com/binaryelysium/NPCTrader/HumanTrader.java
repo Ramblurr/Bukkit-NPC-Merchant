@@ -8,13 +8,15 @@ import java.util.Map;
 import org.bukkit.entity.Player;
 
 public class HumanTrader {
+	private String mName;
 	// map of items for sale and what their value is
 	private HashMap<String, List<ItemValuePair> > mPrices;
 	// map of ongoing transactions
 	private HashMap<String, Transaction> mTransactions = new HashMap<String, Transaction>();
 
-	public HumanTrader(HashMap<String, List<ItemValuePair> > prices) {
+	public HumanTrader(String name, HashMap<String, List<ItemValuePair> > prices) {
 		mPrices = prices;
+		mName = name;
 	}
 	
 	public HumanTrader() {
@@ -56,5 +58,7 @@ public class HumanTrader {
 	public List<ItemValuePair> getItemValue( String item ) {
 		return mPrices.get( item );
 	}
-	
+	public String getName() {
+		return mName;
+	}
 }

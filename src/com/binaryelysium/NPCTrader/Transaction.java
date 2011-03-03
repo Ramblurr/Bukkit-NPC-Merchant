@@ -25,7 +25,7 @@ public class Transaction {
 	public boolean next() {
 		if (mCurrIterator == null) {
 			mCurrIterator = mTrader.getPricesIterator();
-			mPlayer.sendMessage("Welcome! I have all sorts of rare and fantastic items for trade.");
+			say("Welcome! I have all sorts of rare and fantastic items for trade.");
 		}
 		if (mCurrIterator.hasNext()) {
 			Map.Entry<String, List<ItemValuePair>> pairs = mCurrIterator.next();
@@ -38,10 +38,10 @@ public class Transaction {
 				items += itemval.getValue() + " " + itemval.getItem() + delim;
 			}
 			items = items.substring(0, items.length() - delim.length());
-			mPlayer.sendMessage("I'll trade " + mLastItem + " for: " + items);
+			say("I'll trade " + mLastItem + " for: " + items);
 			return true;
 		} else {
-			mPlayer.sendMessage("Sorry, that's all I have. Try again later perhaps.");
+			say("Sorry, that's all I have. Try again later perhaps.");
 			return false;
 		}
 	}
@@ -89,11 +89,14 @@ public class Transaction {
 			}
 		}
 		if( inventory_full )
-			mPlayer.sendMessage("Looks like your inventory is full...");
+			say("Looks like your inventory is full...");
 		else if ( success )
-			mPlayer.sendMessage("Sounds good, pleasure doing business with you!");
+			say("Sounds good, pleasure doing business with you!");
 		else 
-			mPlayer.sendMessage("You don't seem to have enough to trade.");
+			say("You don't seem to have enough to trade.");
 	}
-
+	
+	private void say(String msg) {
+		mPlayer.sendMessage( mTrader.getName() + "> " + msg);
+	}
 }

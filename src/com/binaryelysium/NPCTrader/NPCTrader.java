@@ -83,7 +83,7 @@ public class NPCTrader extends JavaPlugin {
     			List<ItemValuePair> subitems = this.parseItemValuePairs(config, npc_name+".items_for_sale."+item_for_sale);
     			items_map.put(item_for_sale, subitems);
     		}
-    		HumanTrader trader = new HumanTrader(items_map);
+    		HumanTrader trader = new HumanTrader(npc_name, items_map);
     		this.TraderList.put(npc_name, trader);
     		NPCTrader.info("Loaded " + npc_name + " with " + items_map + " items for sale.");
     	}
