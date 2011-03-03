@@ -23,7 +23,7 @@ public class Transaction {
     }
 
     public boolean next() {
-        if ( mCurrIterator == null ) {
+        if ( mCurrIterator == null || !mCurrIterator.hasNext() ) {
             mCurrIterator = mTrader.getPricesIterator();
             say("Welcome! I have all sorts of rare and fantastic items for trade. (left click: cycle through items, right click: confirm trade)");
         }

@@ -31,8 +31,7 @@ public class HumanTrader {
             t = new Transaction(player, this);
             mTransactions.put(player.getDisplayName(), t);
         }
-        if ( !t.next() )
-            mTransactions.remove(player.getDisplayName());
+        t.next();
     }
 
     public void rightClicked( Player player ) {
@@ -46,7 +45,6 @@ public class HumanTrader {
             t = mTransactions.get(player.getDisplayName());
 
             t.complete();
-            mTransactions.remove(player.getDisplayName());
 
         }
     }
