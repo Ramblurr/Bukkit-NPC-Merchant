@@ -1,4 +1,4 @@
-package com.binaryelysium.NPCTrader;
+package com.binaryelysium.NPCMerchant;
 
 import java.io.File;
 import java.io.IOException;
@@ -36,13 +36,13 @@ import redecouverte.npcspawner.NpcSpawner;
 import sun.util.logging.resources.logging;
 
 /**
- * NPCTrader for Bukkit
+ * NPCMerchant for Bukkit
  *
  * @author CaseyLink
  */
-public class NPCTrader extends JavaPlugin {
-    private final NPCTraderPlayerListener playerListener = new NPCTraderPlayerListener(this);
-    private final NPCTraderBlockListener blockListener = new NPCTraderBlockListener(this);
+public class NPCMerchant extends JavaPlugin {
+    private final NPCMerchantPlayerListener playerListener = new NPCMerchantPlayerListener(this);
+    private final NPCMerchantBlockListener blockListener = new NPCMerchantBlockListener(this);
     private final HashMap<Player, Boolean> debugees = new HashMap<Player, Boolean>();
     private WorldListener mWorldListener = new NPCMerchantWorldListener(this);
     private EEntityListener mEntityListener;
@@ -60,7 +60,7 @@ public class NPCTrader extends JavaPlugin {
     	log.log(Level.SEVERE, logPrefix + msg);
     }
     
-    public NPCTrader() {
+    public NPCMerchant() {
     }
 
     public void onEnable() {
@@ -79,19 +79,19 @@ public class NPCTrader extends JavaPlugin {
 
         spawnAllNPCs( this.getServer().getWorld("world"));
         PluginDescriptionFile pdfFile = this.getDescription();
-        NPCTrader.info(pdfFile.getName() + " version " + pdfFile.getVersion() + ": loaded "+ TraderList.size() + " npcs.");
+        NPCMerchant.info(pdfFile.getName() + " version " + pdfFile.getVersion() + ": loaded "+ TraderList.size() + " npcs.");
     }
     
     public void onDisable() {
     	
-    	NPCTrader.info("Disabling");
+    	NPCMerchant.info("Disabling");
     	saveNPCs();
     }
     
     public void saveNPCs() {
     	Configuration config = this.getConfiguration();
     	for( BasicHumanNpc npc : HumanNPCList.values() ) {
-    		NPCTrader.info("Saving NPC " + npc.getName());
+    		NPCMerchant.info("Saving NPC " + npc.getName());
     		Location loc = npc.getBukkitEntity().getLocation();
     		
     		String base_pos_path = npc.getUniqueId()+".position.";
@@ -103,7 +103,7 @@ public class NPCTrader extends JavaPlugin {
     		config.setProperty(base_pos_path+"pitch", loc.getPitch());
     	}
     	if ( !config.save() ) {
-    		NPCTrader.error("Couldn't save config");
+    		NPCMerchant.error("Couldn't save config");
     	}
     }
     
@@ -111,7 +111,7 @@ public class NPCTrader extends JavaPlugin {
     	NpcSpawner.RemoveBasicHumanNpc(npc);
     	
     	Configuration config = this.getConfiguration();
-    	NPCTrader.info("Removing NPC " + npc.getName());
+    	NPCMerchant.info("Removing NPC " + npc.getName());
 		
 		String base_pos_path = npc.getUniqueId()+".position.";
 		config.removeProperty(base_pos_path);
@@ -119,7 +119,7 @@ public class NPCTrader extends JavaPlugin {
 		HumanNPCList.remove(npc.getUniqueId());
 		TraderList.remove(npc.getUniqueId());
 		if ( !config.save() ) {
-    		NPCTrader.error("Couldn't save config");
+    		NPCMerchant.error("Couldn't save config");
     	}
     }
     
@@ -127,7 +127,7 @@ public class NPCTrader extends JavaPlugin {
 		// Ugly ugly hack to workaround broken getNodes() 
     	Object o = config.getProperty(path);
         if (o == null) {
-        	NPCTrader.error("Could not find items: " + path);
+        	NPCMerchant.error("Could not find items: " + path);
         } else if (o instanceof Map) {
             Map<String, ConfigurationNode> nodes =
                 new HashMap<String, ConfigurationNode>();
@@ -138,7 +138,7 @@ public class NPCTrader extends JavaPlugin {
             	try { 
             		value = (Integer) entry.getValue();
             	} catch( ClassCastException e ) {
-            		NPCTrader.error("Failed to parse config file. Error with key: " + entry.getKey() + " for " + path);
+            		NPCMerchant.error("Failed to parse config file. Error with key: " + entry.getKey() + " for " + path);
             	}
             	if( value != -1 ) {
             		ItemValuePair pair = new ItemValuePair(item, value);
@@ -178,12 +178,12 @@ public class NPCTrader extends JavaPlugin {
     		}
     		HumanTrader trader = new HumanTrader(npc_name, items_map);
     		this.TraderList.put(npc_name, trader);
-    		NPCTrader.info("Loaded " + npc_name + " with " + items_map + " items for sale.");
+    		NPCMerchant.info("Loaded " + npc_name + " with " + items_map + " items for sale.");
     	}
     }
     
     public void spawnAllNPCs(World world) {
-    	NPCTrader.info("Spawning all NPCs");
+    	NPCMerchant.info("Spawning all NPCs");
     	this.HumanNPCList.clear();
     	Configuration config = this.getConfiguration();
     	config.load();
@@ -205,7 +205,7 @@ public class NPCTrader extends JavaPlugin {
     		pitch = (float) config.getDouble(base_pos_path+"pitch", 0);
     		
     		if( x != null && y != null &&z != null ) {
-    			NPCTrader.info("Spawning " + npc_name);
+    			NPCMerchant.info("Spawning " + npc_name);
     			BasicHumanNpc hnpc = NpcSpawner.SpawnBasicHumanNpc(npc_name, npc_name, world, x, y, z, yaw, pitch);
                 this.HumanNPCList.put(npc_name, hnpc);
     		}

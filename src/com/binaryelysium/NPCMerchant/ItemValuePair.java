@@ -1,4 +1,4 @@
-package com.binaryelysium.NPCTrader;
+package com.binaryelysium.NPCMerchant;
 
 public class ItemValuePair {
 	private String item;

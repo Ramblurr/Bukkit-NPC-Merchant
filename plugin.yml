@@ -1,7 +1,7 @@
-name: NPCTrader
-main: com.binaryelysium.NPCTrader.NPCTrader
+name: NPCMerchant
+main: com.binaryelysium.NPCMerchant.NPCMerchant
 version: 0.1
 commands:
   merchant:
     description: Control NPC Merchants
-    usage: /merchant create <npc name> OR /merchant move <npc name>
+    usage: /merchant create <npc name> OR /merchant move <npc name> OR /merchant remove <npc name>

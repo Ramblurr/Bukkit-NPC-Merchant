@@ -1,4 +1,4 @@
-package com.binaryelysium.NPCTrader;
+package com.binaryelysium.NPCMerchant;
 
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -11,10 +11,10 @@ import org.bukkit.event.player.PlayerMoveEvent;
  * Handle events for all Player related events
  * @author CaseyLink
  */
-public class NPCTraderPlayerListener extends PlayerListener {
-    private final NPCTrader plugin;
+public class NPCMerchantPlayerListener extends PlayerListener {
+    private final NPCMerchant plugin;
 
-    public NPCTraderPlayerListener(NPCTrader instance) {
+    public NPCMerchantPlayerListener(NPCMerchant instance) {
         plugin = instance;
     }
     

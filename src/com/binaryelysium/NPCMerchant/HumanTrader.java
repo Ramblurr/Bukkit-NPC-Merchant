@@ -1,4 +1,4 @@
-package com.binaryelysium.NPCTrader;
+package com.binaryelysium.NPCMerchant;
 
 import java.util.HashMap;
 import java.util.Iterator;

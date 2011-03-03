@@ -1,4 +1,4 @@
-package com.binaryelysium.NPCTrader;
+package com.binaryelysium.NPCMerchant;
 
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -8,13 +8,13 @@ import org.bukkit.event.block.BlockListener;
 import org.bukkit.event.block.BlockPhysicsEvent;
 
 /**
- * NPCTrader block listener
+ * NPCMerchant block listener
  * @author CaseyLink
  */
-public class NPCTraderBlockListener extends BlockListener {
-    private final NPCTrader plugin;
+public class NPCMerchantBlockListener extends BlockListener {
+    private final NPCMerchant plugin;
 
-    public NPCTraderBlockListener(final NPCTrader plugin) {
+    public NPCMerchantBlockListener(final NPCMerchant plugin) {
         this.plugin = plugin;
     }
 

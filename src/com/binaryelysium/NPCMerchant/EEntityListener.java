@@ -1,4 +1,4 @@
-package com.binaryelysium.NPCTrader;
+package com.binaryelysium.NPCMerchant;
 
 import redecouverte.npcspawner.BasicHumanNpcList;
 
@@ -18,9 +18,9 @@ import redecouverte.npcspawner.NpcSpawner;
 public class EEntityListener extends EntityListener {
 
     private static final Logger logger = Logger.getLogger("Minecraft");
-    private final NPCTrader parent;
+    private final NPCMerchant parent;
 
-    public EEntityListener(NPCTrader parent) {
+    public EEntityListener(NPCMerchant parent) {
         this.parent = parent;
     }
 
