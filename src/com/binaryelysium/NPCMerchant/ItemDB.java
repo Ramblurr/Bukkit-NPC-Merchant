@@ -5,24 +5,26 @@ import java.util.Map;
 import java.util.Scanner;
 
 /**
- * From: https://github.com/Nayruden/olib/blob/master/src/net/omnivr/olib/ItemDB.java
+ * From:
+ * https://github.com/Nayruden/olib/blob/master/src/net/omnivr/olib/ItemDB.java
+ * 
  * @author Nayruden
  */
 public class ItemDB {
 
     static Map<String, Integer> items;
 
-    public static int nameOrIDToID(String name) {
+    public static int nameOrIDToID( String name ) {
         ensureDBLoaded();
 
         Integer id = null;
         int ret = -1;
         try {
             id = Integer.parseInt(name); // Assume it's an id first
-        } catch (NumberFormatException e) {
+        } catch ( NumberFormatException e ) {
             id = items.get(name); // Maybe it's a name
         } finally {
-            if ( !(id == null || !items.containsValue(id.intValue()))) {
+            if ( ! ( id == null || !items.containsValue(id.intValue())) ) {
                 ret = id.intValue();
             }
         }
@@ -30,15 +32,15 @@ public class ItemDB {
     }
 
     private static void ensureDBLoaded() {
-        if (items != null) {
+        if ( items != null ) {
             return;
         }
 
         items = new HashMap<String, Integer>();
         Scanner scanner = new Scanner(ItemDB.class.getResourceAsStream("/items.db"));
-        while (scanner.hasNextLine()) {
+        while ( scanner.hasNextLine() ) {
             String line = scanner.nextLine().trim();
-            if (line.startsWith("#")) {
+            if ( line.startsWith("#") ) {
                 continue;
             }
 
@@ -46,7 +48,7 @@ public class ItemDB {
             try {
                 int item_id = Integer.parseInt(pieces[1]);
                 items.put(pieces[0], item_id);
-            } catch (NumberFormatException e) { // Ignore
+            } catch ( NumberFormatException e ) { // Ignore
             }
         }
     }
