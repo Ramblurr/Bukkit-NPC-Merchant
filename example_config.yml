@@ -1,0 +1,26 @@
+# Example config file
+# Place this in plugins/NPCMerchant  and rename it to config.yml 
+
+
+# the name of the world to load the NPCs into
+worldname: world10
+
+# the list of npcs, they must be defined in a later section
+npcs:
+- JoeBob
+- Glitchy
+
+
+# definition of NPCs
+# Specify items for sale here
+JoeBob:
+    items_for_sale:
+        lapisore: # this item is for sale
+            diamond: 5 # and he will take this 
+            pumpkin: 1 # or this in trade
+Glitchy:
+    items_for_sale:
+        netherack:
+            diamond: 10
+        glowstone:
+            torch: 64
