@@ -25,7 +25,7 @@ public class Transaction {
 	public boolean next() {
 		if (mCurrIterator == null) {
 			mCurrIterator = mTrader.getPricesIterator();
-			say("Welcome! I have all sorts of rare and fantastic items for trade.");
+			say("Welcome! I have all sorts of rare and fantastic items for trade. (left click: cycle through items, right click: confirm trade)");
 		}
 		if (mCurrIterator.hasNext()) {
 			Map.Entry<String, List<ItemValuePair>> pairs = mCurrIterator.next();
@@ -93,7 +93,7 @@ public class Transaction {
 		else if ( success )
 			say("Sounds good, pleasure doing business with you!");
 		else 
-			say("You don't seem to have enough to trade.");
+			say("You don't seem to have enough to trade. Please hold it in your hand.");
 	}
 	
 	private void say(String msg) {
