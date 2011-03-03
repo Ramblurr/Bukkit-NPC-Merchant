@@ -1,0 +1,19 @@
+NPC Merchant
+------------
+
+Simple plugin that allows for the creation of NPC merchants that will trade/sell 
+players various items.
+
+See the example_config.yml file.
+
+Requires the Permissions plugin. Allow access to 'npcmerchant.merchant' in your
+permissions config.
+
+
+Usage:
+
+Left clicking the NPC will cycle through his items.
+Right clicking will confirm the transaction, and the items will be swapped.
+The player must have his item for trade in hand for it to work.
+
+2011/03/03
