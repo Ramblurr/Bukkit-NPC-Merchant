@@ -13,6 +13,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.MobType;
 import org.bukkit.entity.Player;
+import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Server;
@@ -43,11 +44,7 @@ public class NPCTrader extends JavaPlugin {
     private final NPCTraderPlayerListener playerListener = new NPCTraderPlayerListener(this);
     private final NPCTraderBlockListener blockListener = new NPCTraderBlockListener(this);
     private final HashMap<Player, Boolean> debugees = new HashMap<Player, Boolean>();
-    private WorldListener mWorldListener = new WorldListener() {
-    	public void onWorldLoaded(WorldEvent event) {
-    		spawnAllNPCs(event.getWorld());
-        }
-    };
+    private WorldListener mWorldListener = new NPCMerchantWorldListener(this);
     private EEntityListener mEntityListener;
     public BasicHumanNpcList HumanNPCList;
     public HashMap<String, HumanTrader> TraderList; // map of NPC unique ids and the traders
@@ -80,6 +77,7 @@ public class NPCTrader extends JavaPlugin {
         pm.registerEvent(Event.Type.ENTITY_DAMAGED, mEntityListener, Priority.Normal, this);
         pm.registerEvent(Event.Type.WORLD_LOADED, mWorldListener, Priority.Normal, this);
 
+        spawnAllNPCs( this.getServer().getWorld("world"));
         PluginDescriptionFile pdfFile = this.getDescription();
         NPCTrader.info(pdfFile.getName() + " version " + pdfFile.getVersion() + ": loaded "+ TraderList.size() + " npcs.");
     }
@@ -95,8 +93,8 @@ public class NPCTrader extends JavaPlugin {
     		String base_pos_path = npc.getUniqueId()+".position.";
     		
     		config.setProperty(base_pos_path+"x", loc.getX());
-    		config.setProperty(base_pos_path+"y", loc.getZ());
-    		config.setProperty(base_pos_path+"z", loc.getY());
+    		config.setProperty(base_pos_path+"y", loc.getY());
+    		config.setProperty(base_pos_path+"z", loc.getZ());
     		config.setProperty(base_pos_path+"yaw", loc.getYaw());
     		config.setProperty(base_pos_path+"pitch", loc.getPitch());
     	}
@@ -164,7 +162,7 @@ public class NPCTrader extends JavaPlugin {
     	}
     }
     
-    private void spawnAllNPCs(World world) {
+    public void spawnAllNPCs(World world) {
     	NPCTrader.info("Spawning all NPCs");
     	this.HumanNPCList.clear();
     	Configuration config = this.getConfiguration();
@@ -181,6 +179,7 @@ public class NPCTrader extends JavaPlugin {
     		x = (Double) config.getProperty(base_pos_path+"x");
     		y = (Double) config.getProperty(base_pos_path+"y");
     		z = (Double) config.getProperty(base_pos_path+"z");
+    		System.out.println("x:" + x +"  y:" + y + "  z:"+ z);
     		
     		yaw = (float) config.getDouble(base_pos_path+"yaw", 0);
     		pitch = (float) config.getDouble(base_pos_path+"pitch", 0);
@@ -191,6 +190,10 @@ public class NPCTrader extends JavaPlugin {
                 this.HumanNPCList.put(npc_name, hnpc);
     		}
     	}
+    }
+
+    public void onChunkLoaded(Chunk chunk) {
+    	
     }
     
     static boolean spawnHuman = true;
