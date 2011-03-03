@@ -85,6 +85,10 @@ public class NPCTrader extends JavaPlugin {
     public void onDisable() {
     	
     	NPCTrader.info("Disabling");
+    	saveNPCs();
+    }
+    
+    public void saveNPCs() {
     	Configuration config = this.getConfiguration();
     	for( BasicHumanNpc npc : HumanNPCList.values() ) {
     		NPCTrader.info("Saving NPC " + npc.getName());
@@ -99,6 +103,22 @@ public class NPCTrader extends JavaPlugin {
     		config.setProperty(base_pos_path+"pitch", loc.getPitch());
     	}
     	if ( !config.save() ) {
+    		NPCTrader.error("Couldn't save config");
+    	}
+    }
+    
+    public void removeNPC(BasicHumanNpc npc) {
+    	NpcSpawner.RemoveBasicHumanNpc(npc);
+    	
+    	Configuration config = this.getConfiguration();
+    	NPCTrader.info("Removing NPC " + npc.getName());
+		
+		String base_pos_path = npc.getUniqueId()+".position.";
+		config.removeProperty(base_pos_path);
+		
+		HumanNPCList.remove(npc.getUniqueId());
+		TraderList.remove(npc.getUniqueId());
+		if ( !config.save() ) {
     		NPCTrader.error("Couldn't save config");
     	}
     }
@@ -233,7 +253,12 @@ public class NPCTrader extends JavaPlugin {
 
                 BasicHumanNpc hnpc = NpcSpawner.SpawnBasicHumanNpc(args[1], args[1], player.getWorld(), l.getX(), l.getY(), l.getZ(), l.getYaw(), l.getPitch());
                 this.HumanNPCList.put(args[1], hnpc);
-
+                saveNPCs();
+            } else if (subCommand.equals("remove")) {
+            	BasicHumanNpc npc = this.HumanNPCList.get(args[1]);
+                if (npc != null) {
+                	removeNPC(npc);
+                }
             // move npc-id
             } else if (subCommand.equals("move")) {
                 if (args.length < 2) {
