@@ -69,26 +69,9 @@ public class NPCTrader extends JavaPlugin {
     public void onEnable() {
         this.HumanNPCList = new BasicHumanNpcList();  
         this.TraderList = new HashMap<String, HumanTrader>();
-    	Configuration config = this.getConfiguration();
+    	reloadMerchantConfig();
     	
-    	List<String> npc_list = config.getStringList("npcs", null);
-    	
-    	for( String npc_name : npc_list ) {
-    		
-    		// load items
-    		Map<String, ConfigurationNode> items = config.getNodes(npc_name+".items_for_sale");
-    		HashMap<String, List<ItemValuePair> > items_map = new HashMap<String, List<ItemValuePair> >();
-    		for( Map.Entry<String, ConfigurationNode> entry : items.entrySet() ) {
-    			String item_for_sale = entry.getKey();
-    			List<ItemValuePair> subitems = this.parseItemValuePairs(config, npc_name+".items_for_sale."+item_for_sale);
-    			items_map.put(item_for_sale, subitems);
-    		}
-    		HumanTrader trader = new HumanTrader(npc_name, items_map);
-    		this.TraderList.put(npc_name, trader);
-    		NPCTrader.info("Loaded " + npc_name + " with " + items_map + " items for sale.");
-    	}
-
-        // Register our events
+    	// Register our events
         PluginManager pm = getServer().getPluginManager();
         pm.registerEvent(Event.Type.PLAYER_JOIN, playerListener, Priority.Normal, this);
        
@@ -161,10 +144,31 @@ public class NPCTrader extends JavaPlugin {
         debugees.put(player, value);
     }
     
+    private void reloadMerchantConfig() {
+    	this.TraderList.clear();
+    	Configuration config = this.getConfiguration();
+    	List<String> npc_list = config.getStringList("npcs", null);
+
+    	for( String npc_name : npc_list ) {
+    		// load items
+    		Map<String, ConfigurationNode> items = config.getNodes(npc_name+".items_for_sale");
+    		HashMap<String, List<ItemValuePair> > items_map = new HashMap<String, List<ItemValuePair> >();
+    		for( Map.Entry<String, ConfigurationNode> entry : items.entrySet() ) {
+    			String item_for_sale = entry.getKey();
+    			List<ItemValuePair> subitems = this.parseItemValuePairs(config, npc_name+".items_for_sale."+item_for_sale);
+    			items_map.put(item_for_sale, subitems);
+    		}
+    		HumanTrader trader = new HumanTrader(npc_name, items_map);
+    		this.TraderList.put(npc_name, trader);
+    		NPCTrader.info("Loaded " + npc_name + " with " + items_map + " items for sale.");
+    	}
+    }
+    
     private void spawnAllNPCs(World world) {
     	NPCTrader.info("Spawning all NPCs");
     	this.HumanNPCList.clear();
     	Configuration config = this.getConfiguration();
+    	config.load();
     	
     	List<String> npc_list = config.getStringList("npcs", null);
     	
@@ -239,7 +243,9 @@ public class NPCTrader extends JavaPlugin {
                     return true;
                 }
 
-            }
+            } /*else if( subCommand.equals("reload") ) {
+            	reloadMerchantConfig();
+            }*/
 
 
         } catch (Exception e) {
